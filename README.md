@@ -19,4 +19,4 @@ I like web development and video game development.
 
 ---
 
-[![Humbleg0d GitHub stats](https://github-readme-stats.vercel.app/api?username=HumbleG0d)](https://github.com/anuraghazra/github-readme-stats)
+[![Humbleg0d GitHub stats](https://github-readme-stats.vercel.app/api?username=HumbleG0d&show_icons=true&theme=radical)](https://github.com/anuraghazra/github-readme-stats)
