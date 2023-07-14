@@ -1,6 +1,6 @@
-### Hi there 👋
-
-<!--
+### Hi. I'm is HumbleG0d 🤙
+[![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=HumbleG0d)](https://github.com/anuraghazra/github-readme-stats)
+<!-- 
 **HumbleG0d/HumbleG0d** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
 
 Here are some ideas to get you started:
