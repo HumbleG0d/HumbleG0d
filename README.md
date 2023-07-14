@@ -1,11 +1,8 @@
 ### 👋 Hello World ! <img src="https://github.com/TheDudeThatCode/TheDudeThatCode/blob/master/Assets/Earth.gif" width="24px">
 
-
-[![Humbleg0d GitHub stats](https://github-readme-stats.vercel.app/api?username=HumbleG0d)](https://github.com/anuraghazra/github-readme-stats)
-
 ❤️: Programming | ❣️: Anime
 
-**I am currently studying computer science at the National University of Engineering (Peru).
+I am currently studying computer science at the National University of Engineering (Peru).
 I like web development and video game development.
 
 ---
@@ -21,3 +18,5 @@ I like web development and video game development.
 <a src="https://nodejs.org/"><img src="https://img.icons8.com/color/48/000000/nodejs.png"/></a>
 
 ---
+
+[![Humbleg0d GitHub stats](https://github-readme-stats.vercel.app/api?username=HumbleG0d)](https://github.com/anuraghazra/github-readme-stats)
