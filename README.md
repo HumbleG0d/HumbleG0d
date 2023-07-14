@@ -1,6 +1,7 @@
 ### 👋 Hello World ! <img src="https://github.com/TheDudeThatCode/TheDudeThatCode/blob/master/Assets/Earth.gif" width="24px">
 
-❤️: Programming | ❣️: Anime <a href="https://tenor.com/view/anime-anime-girl-cute-gif-20825958">Anime Anime Girl Sticker</a>from <a href="https://tenor.com/search/anime-stickers">Anime Stickers</a>
+❤️: Programming | ❣️: Anime 
+<iframe src="https://giphy.com/embed/4QxQgWZHbeYwM" width="480" height="270" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/kawaii-aegyo-4QxQgWZHbeYwM">via GIPHY</a></p>
 
 I am currently studying computer science at the National University of Engineering (Peru).
 I like web development and video game development.
