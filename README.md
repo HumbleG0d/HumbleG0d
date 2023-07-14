@@ -1,7 +1,7 @@
 ### 👋 Hello World ! <img src="https://github.com/TheDudeThatCode/TheDudeThatCode/blob/master/Assets/Earth.gif" width="24px">
 
 ❤️: Programming | ❣️: Anime 
-<a href="https://giphy.com/gifs/kawaii-aegyo-4QxQgWZHbeYwM"></a>
+
 
 I am currently studying computer science at the National University of Engineering (Peru).
 I like web development and video game development.
