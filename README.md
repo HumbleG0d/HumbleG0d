@@ -1,4 +1,4 @@
-<h4 align="left">👋 Hello World !<img src="https://github.com/TheDudeThatCode/TheDudeThatCode/blob/master/Assets/Earth.gif" width="24px"> </h4>
+<h2 align="left">👋 Hello World !<img src="https://github.com/TheDudeThatCode/TheDudeThatCode/blob/master/Assets/Earth.gif" width="24px"> </h2>
 <h3>❤️: Programming | ❣️: Anime </h3> <img src="https://komarev.com/ghpvc/?username=humbleg0d&label=Profile%20views&color=0e75b6&style=flat" alt="humbleg0d" /> 
 <p>I am currently studying computer science at the National University of Engineering (Peru).</br>I like web development and video game development.</p>
 
@@ -12,8 +12,12 @@
 
 <div>
   <img align="left" src="https://github-readme-stats.vercel.app/api/top-langs?username=humbleg0d&show_icons=true&locale=en&layout=compact" alt="humbleg0d" />
-  <img align="center" src="https://github-readme-stats.vercel.app/api?username=humbleg0d&show_icons=true&locale=en" alt="humbleg0d" /><
+</div>
+<div>
+  <img align="center" src="https://github-readme-stats.vercel.app/api?username=humbleg0d&show_icons=true&locale=en" alt="humbleg0d" />
+</div>
+<div>
+  
   <img align="center" src="https://github-readme-streak-stats.herokuapp.com/?user=humbleg0d&" alt="humbleg0d" />
 </div>
-
 
