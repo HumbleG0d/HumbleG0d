@@ -1,6 +1,7 @@
-<h5 align="left">👋 Hello World ! <img src="https://github.com/TheDudeThatCode/TheDudeThatCode/blob/master/Assets/Earth.gif" width="24px"> <br>❤️: Programming | ❣️: Anime <br>I am currently studying computer science at the National University of Engineering (Peru).<br>I like web development and video game development.</h5>
+<h3 align="left">👋 Hello World ! <img src="https://github.com/TheDudeThatCode/TheDudeThatCode/blob/master/Assets/Earth.gif" width="24px"> 
+<br>❤️: Programming | ❣️: Anime <br>I am currently studying computer science at the National University of Engineering (Peru).<br>I like web development and video game development.</h3>
 
-<h5>Technologies and tools that I use <img src="https://media.giphy.com/media/WUlplcMpOCEmTGBtBW/giphy.gif" width="30"></h5>
+<h3>Technologies and tools that I use <img src="https://media.giphy.com/media/WUlplcMpOCEmTGBtBW/giphy.gif" width="30"></h3>
 
 
 <p align="left"> <img src="https://komarev.com/ghpvc/?username=humbleg0d&label=Profile%20views&color=0e75b6&style=flat" alt="humbleg0d" /> </p>
