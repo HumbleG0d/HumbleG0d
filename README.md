@@ -11,15 +11,8 @@
 
 ### ⚙️ &nbsp;GitHub Analytics
 
-<a href="https://next.ossinsight.io/widgets/official/compose-user-dashboard-stats?user_id=95192731" target="_blank" style="display: block" align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://next.ossinsight.io/widgets/official/compose-user-dashboard-stats/thumbnail.png?user_id=95192731&image_size=auto&color_scheme=dark" width="771" height="auto">
-    <img alt="Dashboard stats of @HumbleG0d" src="https://next.ossinsight.io/widgets/official/compose-user-dashboard-stats/thumbnail.png?user_id=95192731&image_size=auto&color_scheme=light" width="771" height="auto">
-  </picture>
-</a>
-
+[![GitHub Streak](https://streak-stats.demolab.com/?user=HumbleG0d&theme=onedark)](https://git.io/streak-stats)
 <br/>
 
 [![Humbleg0d GitHub stats](https://github-readme-stats.vercel.app/api?username=HumbleG0d&show_icons=true&theme=radical)](https://github.com/anuraghazra/github-readme-stats)
-
 
