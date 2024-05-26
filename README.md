@@ -11,8 +11,11 @@
 
 ### ⚙️ &nbsp;GitHub Analytics
 
+[![Humbleg0d GitHub stats](https://github-readme-stats.vercel.app/api?username=HumbleG0d&show_icons=true&theme=onedark)](https://github.com/anuraghazra/github-readme-stats)
+<br/>
 [![GitHub Streak](https://streak-stats.demolab.com/?user=HumbleG0d&theme=onedark)](https://git.io/streak-stats)
 <br/>
+![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=HumbleG0d&layout=compact&theme=onedark)
 
-[![Humbleg0d GitHub stats](https://github-readme-stats.vercel.app/api?username=HumbleG0d&show_icons=true&theme=radical)](https://github.com/anuraghazra/github-readme-stats)
+
 
