@@ -12,7 +12,7 @@
 
 ### ⚙️ &nbsp;GitHub Analytics
 
-![snake gif](https://github.com/your-user-name/HumbleG0d/blob/output/github-contribution-grid-snake.gif)
+![snake gif](https://github.com/HumbleG0d/HumbleG0d/blob/output/github-contribution-grid-snake.gif)
 [![Humbleg0d GitHub stats](https://github-readme-stats.vercel.app/api?username=HumbleG0d&show_icons=true&theme=onedark)](https://github.com/anuraghazra/github-readme-stats)
 <br/>
 [![GitHub Streak](https://streak-stats.demolab.com/?user=HumbleG0d&theme=onedark)](https://git.io/streak-stats)
