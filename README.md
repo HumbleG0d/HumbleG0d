@@ -135,12 +135,14 @@
   </h1>
 </div>
 
-![snake gif](https://github.com/HumbleG0d/HumbleG0d/blob/output/github-snake-dark.svg)
 
+<!---  SNACKE --> 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="github-snake-dark.svg" />
-  <source media="(prefers-color-scheme: light)" srcset="github-snake.svg" />
-  <img alt="github-snake" src="github-snake.svg" />
+  <source
+    media="(prefers-color-scheme: dark)"
+    srcset="https://github.com/HumbleG0d/HumbleG0d/blob/output/images/breakout-dark.svg"
+  />
+  <img alt="Breakout Game" src="https://github.com/HumbleG0d/HumbleG0d/blob/output/images/breakout-dark.svg" />
 </picture>
 
 <table>
