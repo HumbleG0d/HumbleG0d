@@ -140,9 +140,13 @@
 <picture>
   <source
     media="(prefers-color-scheme: dark)"
-    srcset="https://github.com/HumbleG0d/HumbleG0d/blob/output/images/breakout-dark.svg"
+    srcset="https://github.com/HumbleG0d/HumbleG0d/blob/github-breakout/images/breakout-dark.svg"
   />
-  <img alt="Breakout Game" src="https://github.com/HumbleG0d/HumbleG0d/blob/output/images/breakout-dark.svg" />
+  <source
+    media="(prefers-color-scheme: light)"
+    srcset="https://github.com/HumbleG0d/HumbleG0d/blob/github-breakout/images/breakout-light.svg"
+  />
+  <img alt="Breakout Game" src="https://github.com/HumbleG0d/HumbleG0d/blob/github-breakout/images/breakout-dark.svg" />
 </picture>
 
 <table>
