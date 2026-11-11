@@ -1,167 +1,69 @@
-<div>
-  <a href="#">
-    <img width="100%" height= "15" src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" />
-  </a>
-</div>
+<!-- ═══════════════════════════ CABECERA ═══════════════════════════ -->
+<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&height=200&color=0:1a1b26,50:7aa2f7,100:bb9af7&section=header&text=HumbleG0d&fontSize=64&fontColor=c0caf5&fontAlignY=36&animation=fadeIn&desc=Software%20Developer%20%E2%80%A2%20Computer%20Science%20Student&descSize=18&descAlignY=58" alt="HumbleG0d" />
 
-<div alig="center">
-  <p align="center">
-    <picture><img src="./assets/about_me.gif" width = 85px align="center"></picture>
-  </p>
- <p align="center">
-    <img src="https://readme-typing-svg.demolab.com/?lines=HumbleG0d;Software%20Developer;Computer%20Science%20Student&font=Fira%20Code&center=true&width=440&height=45&color=00FFFF&vCenter=true&pause=1000&size=26" />
+<p align="center">
+  <img src="./assets/about_me.gif" width="90" alt="about me" />
 </p>
-</div>
 
-<div style="display: flex; align-items: center">
-  <h2> 
-    <a href="#-my-github-stats--">
-      <img src="https://user-images.githubusercontent.com/74038190/216122041-518ac897-8d92-4c6b-9b3f-ca01dcaf38ee.png" alt="Fire" width="20" height ="25" /> 
-    </a>
-    Skills:
-  </h2>
-</div>
-
-
-<div style="display: flex; align-items: flex-start; align: center">
-<table align="center">
-  <tr>
-    <td align="center" width="96">
-        <img src="https://techstack-generator.vercel.app/java-icon.svg" alt="icon" width="65" height="65" />
-      <br>Java
-    </td>
-    <td align="center" width="96">
-        <img src="https://skillicons.dev/icons?i=spring" width="55" height="65" alt="Spring" />
-      <br>Spring
-    </td>
-    <td align="center" width="96">
-        <img src="https://techstack-generator.vercel.app/mysql-icon.svg" alt="icon" width="65" height="65" />
-      <br>MySQL
-    </td>
-    <td align="center" width="96">
-        <img src="https://skillicons.dev/icons?i=postgres" width="55" height="65" alt="PostgreSQL" />
-      <br>PostgreSQL
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="96">
-        <img src="https://techstack-generator.vercel.app/docker-icon.svg" alt="icon" width="65" height="65" />
-      <br>Docker
-    </td>
-    <td align="center" width="96">
-        <img src="https://techstack-generator.vercel.app/js-icon.svg" alt="icon" width="65" height="65" />
-      <br>JavaScript
-    </td>
-    <td align="center"  width="96">
-        <img src="https://skillicons.dev/icons?i=html" width="48" height="65" alt="HTML5" />
-      <br>HTML5
-    </td>
-    <td align="center" width="96">
-        <img src="https://skillicons.dev/icons?i=css" width="48" height="65" alt="CSS" />
-      <br>CSS
-    </td>
-  </tr>
-  <tr>
-    <td align="center" width="96">
-        <img src="https://techstack-generator.vercel.app/react-icon.svg" alt="icon" width="65" height="65" />
-      <br>React
-    </td>
-    <td align="center" width="96">
-        <img src="https://skillicons.dev/icons?i=tailwind" width="48" height="65" alt="Tailwind" />
-      <br>Tailwind
-    </td>
-    <td align="center" width="96">
-        <img src="https://techstack-generator.vercel.app/webpack-icon.svg" alt="icon" width="65" height="65" />
-      <br>Webpack
-    </td>
-    <td align="center" width="96"> 
-        <img src="https://user-images.githubusercontent.com/25181517/192108372-f71d70ac-7ae6-4c0d-8395-51d8870c2ef0.png" width="65" height="65" alt="Git" />
-      <br>Git
-    </td>
-  </tr>
-</table>
-</div>
-
-
-<!--- --> 
-<div style="display: flex; align-items: center">
-  <h2> 
-    <a href="#-my-github-stats--">
-      <img src="https://media.giphy.com/media/WUlplcMpOCEmTGBtBW/giphy.gif" width="35"> 
-    </a>
-    Tools:
-  </h2>
-</div>
-
-<div style="display: flex; align-items: flex-start; align: center">
-<table align="center">
-  <tr>
-  <td align="center" width="96">
-        <img src="https://skillicons.dev/icons?i=vscode" width="48" height="65" alt="Spring" />
-      <br>Vscode
-    </td>
-    <td align="center" width="96">
-        <img src="https://skillicons.dev/icons?i=idea" width="48" height="65" alt="Spring" />
-      <br>IntelliJ
-    </td>
-    <td align="center" width="96">
-        <img src="https://techstack-generator.vercel.app/github-icon.svg" alt="icon" width="65" height="65" />
-      <br>Github
-    </td>
-  </tr>
-  <tr>
-  <td align="center" width="96">
-        <img src="https://skillicons.dev/icons?i=maven" width="48" height="48" alt="Spring" />
-      <br>Maven
-    </td>
-  <td align="center" width="96">
-        <img src="https://skillicons.dev/icons?i=postman" width="48" height="48" alt="Spring" />
-      <br>Postman
-    </td>
-    <td align="center" width="96">
-        <img src="https://skillicons.dev/icons?i=githubactions" width="48" height="48" alt="Spring" />
-      <br>Github Actions
-    </td>
-  </tr>
-</table>
-</div>
-
-<div style="display: flex; align-items: center">
-  <h1> 
-    My GitHub Stats 
-    <a href="#-my-github-stats--">
-      <img src = "https://raw.githubusercontent.com/HighAmbition211/HighAmbition211/auxiliary/others/charts.gif" width = 35px height = 35px>
-    </a>
-  </h1>
-</div>
-
-
-<!---  SNACKE --> 
-<picture>
-  <source
-    media="(prefers-color-scheme: dark)"
-    srcset="https://github.com/HumbleG0d/HumbleG0d/blob/github-breakout/images/breakout-dark.svg"
-  />
-  <source
-    media="(prefers-color-scheme: light)"
-    srcset="https://github.com/HumbleG0d/HumbleG0d/blob/github-breakout/images/breakout-light.svg"
-  />
-  <img alt="Breakout Game" src="https://github.com/HumbleG0d/HumbleG0d/blob/github-breakout/images/breakout-dark.svg" />
-</picture>
-
-<table>
-  <tr>
-    <td>
-      <img align="left" src="https://github-readme-stats.vercel.app/api?username=HumbleG0d&show_icons=true&theme=tokyonight" alt="webDev's Github stats" />
-    </td>
-    <td>
-      <img height="195px" align="right" alt="webDev's Github Languages" src="https://github-readme-stats.vercel.app/api/top-langs/?username=HumbleG0d&layout=compact&theme=tokyonight" />
-    </td>
-  </tr>
-</table>
-
-<div>
-  <a href="#">
-    <img width="100%" height= "15" src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif" />
+<p align="center">
+  <a href="https://github.com/HumbleG0d">
+    <img src="https://readme-typing-svg.demolab.com/?lines=Hola!+Soy+HumbleG0d+%F0%9F%91%8B;Software+Developer;Computer+Science+Student;Java+%E2%80%A2+Spring+%E2%80%A2+React&font=Fira+Code&center=true&width=460&height=45&color=7DCFFF&vCenter=true&pause=1000&size=24" alt="Typing SVG" />
   </a>
-</div>
+</p>
+
+<p align="center">
+  <img src="https://komarev.com/ghpvc/?username=HumbleG0d&style=for-the-badge&color=7aa2f7&label=VISITAS" alt="visitas" />
+  <img src="https://img.shields.io/github/followers/HumbleG0d?style=for-the-badge&color=bb9af7&labelColor=1a1b26&logo=github" alt="seguidores" />
+</p>
+
+<!-- ═══════════════════════════ SKILLS ═══════════════════════════ -->
+<h2 align="center">
+  <img src="https://user-images.githubusercontent.com/74038190/216122041-518ac897-8d92-4c6b-9b3f-ca01dcaf38ee.png" width="22" />
+  Skills
+</h2>
+
+<p align="center">
+  <img src="https://skillicons.dev/icons?i=java,spring,mysql,postgres,docker,js&theme=dark" alt="skills backend" />
+  <br />
+  <img src="https://skillicons.dev/icons?i=html,css,react,tailwind,webpack,git&theme=dark" alt="skills frontend" />
+</p>
+
+<!-- ═══════════════════════════ TOOLS ═══════════════════════════ -->
+<h2 align="center">
+  <img src="https://media.giphy.com/media/WUlplcMpOCEmTGBtBW/giphy.gif" width="30" />
+  Tools
+</h2>
+
+<p align="center">
+  <img src="https://skillicons.dev/icons?i=vscode,idea,github,maven,postman,githubactions&theme=dark" alt="tools" />
+</p>
+
+<!-- ═══════════════════════════ 3D CONTRIBUCIONES ═══════════════════════════ -->
+<h2 align="center">
+  <img src="https://raw.githubusercontent.com/HighAmbition211/HighAmbition211/auxiliary/others/charts.gif" width="28" />
+  My GitHub Stats
+</h2>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./profile-3d-contrib/profile-night-rainbow.svg" />
+    <source media="(prefers-color-scheme: light)" srcset="./profile-3d-contrib/profile-green-animate.svg" />
+    <img src="./profile-3d-contrib/profile-night-rainbow.svg" alt="Contribuciones en 3D" />
+  </picture>
+</p>
+
+<p align="center">
+  <img src="https://streak-stats.demolab.com?user=HumbleG0d&theme=tokyonight&hide_border=true&border_radius=10" alt="racha de contribuciones" />
+</p>
+
+<!-- ═══════════════════════════ BREAKOUT ═══════════════════════════ -->
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/HumbleG0d/HumbleG0d/github-breakout/images/breakout-dark.svg" />
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/HumbleG0d/HumbleG0d/github-breakout/images/breakout-light.svg" />
+    <img alt="Breakout Game" src="https://raw.githubusercontent.com/HumbleG0d/HumbleG0d/github-breakout/images/breakout-dark.svg" />
+  </picture>
+</p>
+
+<!-- ═══════════════════════════ PIE ═══════════════════════════ -->
+<img width="100%" src="https://capsule-render.vercel.app/api?type=waving&height=120&color=0:bb9af7,50:7aa2f7,100:1a1b26&section=footer" alt="footer" />
