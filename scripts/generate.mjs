@@ -1,11 +1,11 @@
 // Genera las tarjetas holográficas del perfil (sin dependencias, Node 20+):
-//   assets/neofetch.svg → neofetch minimalista + mapa de actividad holográfico
+//   assets/hero.svg     → avatar en anillos holográficos + nombre + ciclo de agente RAG animado
+//   assets/activity.svg → año de contribuciones en radar radial + anillos de lenguajes + rachas
 //   assets/stack.svg    → stack de IA / backend / devops como hologramas
 // Uso: node scripts/generate.mjs   (GITHUB_TOKEN opcional; en Actions se usa el del workflow)
-import { writeFileSync, mkdirSync } from "node:fs";
+import { writeFileSync, mkdirSync, rmSync } from "node:fs";
 
 const USER = "HumbleG0d";
-const TZ_OFFSET = -5; // Lima (UTC-5) para el horario de actividad
 const TOKEN = process.env.GITHUB_TOKEN;
 const OUT = new URL("../assets/", import.meta.url);
 
@@ -13,9 +13,11 @@ const C = {
   bg: "#070b14", cyan: "#7dcfff", blue: "#7aa2f7", purple: "#bb9af7", green: "#9ece6a",
   orange: "#ff9e64", text: "#c0caf5", dim: "#565f89",
 };
-const FONT = "'JetBrains Mono','Fira Code',Consolas,'Courier New',monospace";
+const SANS = "'Segoe UI','Inter','Helvetica Neue',system-ui,sans-serif";
+const MONO = "'JetBrains Mono','Fira Code',Consolas,monospace";
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const HEADERS = { "User-Agent": "profile-card-generator", ...(TOKEN && { Authorization: `Bearer ${TOKEN}` }) };
+const f1 = (n) => +n.toFixed(1);
 
 // ── Datos ───────────────────────────────────────────────────────────────────
 async function gh(path) {
@@ -51,25 +53,22 @@ async function calendar() {
   return days.sort((a, b) => a.date.localeCompare(b.date));
 }
 
-function streaks(days) {
+function dayStats(days) {
   let best = 0, run = 0;
   for (const d of days) { run = d.count > 0 ? run + 1 : 0; best = Math.max(best, run); }
   let cur = 0, i = days.length - 1;
   if (i >= 0 && days[i].count === 0) i--; // hoy aún puede no tener contribuciones
   for (; i >= 0 && days[i].count > 0; i--) cur++;
-  return { cur, best };
-}
-
-async function habits() {
-  try {
-    const ev = await gh(`/users/${USER}/events/public?per_page=100`);
-    const hours = Array(24).fill(0);
-    for (const e of ev) if (e.type === "PushEvent") hours[(new Date(e.created_at).getUTCHours() + 24 + TZ_OFFSET) % 24]++;
-    const peak = hours.indexOf(Math.max(...hours));
-    if (!hours[peak]) return null;
-    const tag = peak >= 21 || peak < 5 ? "night owl" : peak < 12 ? "early bird" : "day coder";
-    return `peak ${String(peak).padStart(2, "0")}:00 · ${tag}`;
-  } catch { return null; }
+  const byWd = Array(7).fill(0);
+  for (const d of days) byWd[new Date(d.date + "T00:00:00Z").getUTCDay()] += d.count;
+  const WD = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const peak = days.reduce((a, d) => (d.count > a.count ? d : a), { count: 0, date: "" });
+  const fmt = (s) => new Date(s + "T00:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+  return {
+    total: days.reduce((s, d) => s + d.count, 0), cur, best,
+    favDay: WD[byWd.indexOf(Math.max(...byWd))],
+    peak: peak.count ? `${peak.count} on ${fmt(peak.date)}` : "—",
+  };
 }
 
 async function languages(repos) {
@@ -78,163 +77,194 @@ async function languages(repos) {
     try { for (const [l, b] of Object.entries(await gh(`/repos/${USER}/${r.name}/languages`))) total[l] = (total[l] || 0) + b; } catch {}
   }));
   const sum = Object.values(total).reduce((a, b) => a + b, 0) || 1;
-  const top = Object.entries(total).sort((a, b) => b[1] - a[1]);
-  const shown = top.slice(0, 5).map(([l, b]) => ({ l, p: b / sum }));
-  const rest = 1 - shown.reduce((a, x) => a + x.p, 0);
-  if (rest > 0.005) shown.push({ l: "Other", p: rest });
-  return shown;
+  return Object.entries(total).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([l, b]) => ({ l, p: b / sum }));
 }
 const LANG_COLOR = {
-  Java: "#e76f00", Python: "#4b8bbe", "Jupyter Notebook": "#f37726", JavaScript: "#f1e05a", TypeScript: "#3178c6",
-  CSS: "#a074c4", HTML: "#e34c26", Shell: "#89e051", Dockerfile: "#7aa2f7", Other: C.dim,
+  Python: "#7dcfff", HTML: "#ff9e64", C: "#bb9af7", TypeScript: "#7aa2f7", Java: "#e0af68",
+  JavaScript: "#e0af68", "Jupyter Notebook": "#ff9e64", CSS: "#bb9af7", Shell: "#9ece6a",
 };
+const RING_COLORS = [C.cyan, C.purple, C.orange, C.green];
 
-function uptime(since) {
-  const a = new Date(since), b = new Date();
-  let y = b.getUTCFullYear() - a.getUTCFullYear(), m = b.getUTCMonth() - a.getUTCMonth();
-  if (b.getUTCDate() < a.getUTCDate()) m--;
-  if (m < 0) { y--; m += 12; }
-  return `${y} years, ${m} months`;
+async function avatar() {
+  const r = await fetch(`https://avatars.githubusercontent.com/${USER}?size=200`);
+  return `data:${r.headers.get("content-type") || "image/jpeg"};base64,${Buffer.from(await r.arrayBuffer()).toString("base64")}`;
 }
 
-// ── Arte ASCII: gato con lentes (mitad izquierda reflejada) ─────────────────
-const MIRROR = { "/": "\\", "\\": "/", "(": ")", ")": "(" };
-const mirror = (s) => [...s].reverse().map((c) => MIRROR[c] ?? c).join("");
-const HALF = [
-  "    /\\         ", "   /  \\        ", "  /    \\_______", " /             ",
-  "|   ________   ", "|  /        \\__", "| |   (@)    | ", "|  \\________/  ",
-  "|             /", "|  ==        (_", " \\ ==         \\", "  \\          \\_", "   \\___________",
-];
-const CAT = [
-  ...HALF.map((h) => h + mirror(h)),
-  "   .-------------------------.",
-  "   |  > agent.invoke(task)_  |",
-  "   '-------------------------'",
-  "  /___________________________\\",
-];
-
-// ── Piezas comunes de los SVG ───────────────────────────────────────────────
-const commonDefs = (W, H, glowCy) => `
-  <radialGradient id="bgGlow" cx="50%" cy="${glowCy}" r="90%"><stop offset="0" stop-color="#0f2a44"/><stop offset="1" stop-color="${C.bg}"/></radialGradient>
-  <pattern id="scan" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="1" fill="${C.cyan}" opacity="0.07"/></pattern>
-  <filter id="glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-  <clipPath id="card"><rect width="${W}" height="${H}" rx="16"/></clipPath>`;
+// ── Piezas comunes ──────────────────────────────────────────────────────────
+const commonDefs = (W, H, cx, cy) => `
+  <radialGradient id="bgGlow" cx="${cx}" cy="${cy}" r="85%"><stop offset="0" stop-color="#0f2a44"/><stop offset="1" stop-color="${C.bg}"/></radialGradient>
+  <pattern id="scan" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="1" fill="${C.cyan}" opacity="0.06"/></pattern>
+  <filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <filter id="bigglow" x="-30%" y="-60%" width="160%" height="220%"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <clipPath id="card"><rect width="${W}" height="${H}" rx="18"/></clipPath>`;
 const commonCss = `
   .scan{animation:scanmove 1.2s linear infinite}
   @keyframes scanmove{to{transform:translateY(4px)}}`;
-const frame = (W, H) =>
-  `<rect x="0.75" y="0.75" width="${W - 1.5}" height="${H - 1.5}" rx="16" fill="none" stroke="${C.cyan}" stroke-opacity="0.45" stroke-width="1.5" filter="url(#glow)"/>`;
-
-// ── Tarjeta neofetch + actividad ────────────────────────────────────────────
-function neofetch(info) {
-  const W = 940, LH = 21, FS = 14, PADX = 36, PADY = 40, infoX = 380;
-  let i = 0;
-  const delay = () => `style="animation-delay:${(0.2 + i++ * 0.07).toFixed(2)}s"`;
-  const kv = (k, v, y) => `<text class="l" ${delay()} x="${infoX}" y="${y}"><tspan fill="${C.cyan}" font-weight="700">${esc(k)}</tspan><tspan fill="${C.dim}">: </tspan><tspan fill="${C.text}">${esc(v)}</tspan></text>`;
-
-  const rows = [
-    (y) => `<text class="l" ${delay()} x="${infoX}" y="${y}" font-weight="700"><tspan fill="${C.purple}">sergio</tspan><tspan fill="${C.text}">@</tspan><tspan fill="${C.purple}">HumbleG0d</tspan></text>`,
-    (y) => `<text class="l" ${delay()} x="${infoX}" y="${y}" fill="${C.dim}">${"─".repeat(46)}</text>`,
-    (y) => kv("Role", "AI Engineer · Backend Developer", y),
-    (y) => kv("Focus", "Agents · RAG · LLM apps", y),
-    (y) => kv("Kernel", "Computer Science Student", y),
-    (y) => kv("Host", info.location, y),
-    (y) => kv("Uptime", info.uptime, y),
-    null,
-    (y) => `<text class="l" ${delay()} x="${infoX}" y="${y}" fill="${C.purple}" font-weight="700">— github ${"─".repeat(37)}</text>`,
-    (y) => kv("Repos", `${info.repos} · Stars: ${info.stars} · Followers: ${info.followers}`, y),
-    (y) => kv("Commits", `${info.total} contributions (last year)`, y),
-    (y) => kv("Streak", `${info.streak.cur} days · best ${info.streak.best}`, y),
-    info.habits ? (y) => kv("Habits", info.habits, y) : undefined, // se oculta si no hay pushes públicos recientes
-    null,
-    (y) => {
-      // Barra de lenguajes por bytes (estilo lowlighter/metrics)
-      const BW = 470; let x = infoX, out = `<g class="l" ${delay()}>`;
-      out += `<text x="${infoX}" y="${y}" fill="${C.cyan}" font-weight="700">Languages</text>`;
-      const by = y + 8;
-      out += `<rect x="${infoX}" y="${by}" width="${BW}" height="8" rx="4" fill="${C.dim}" opacity="0.25"/>`;
-      out += `<clipPath id="barclip"><rect x="${infoX}" y="${by}" width="${BW}" height="8" rx="4"/></clipPath><g clip-path="url(#barclip)">`;
-      for (const { l, p } of info.langs) { out += `<rect x="${x.toFixed(1)}" y="${by}" width="${(p * BW).toFixed(1)}" height="8" fill="${LANG_COLOR[l] ?? C.blue}"/>`; x += p * BW; }
-      out += `</g>`;
-      info.langs.forEach(({ l, p }, j) => {
-        const lx = infoX + (j % 3) * 160, ly = by + 28 + Math.floor(j / 3) * 20;
-        out += `<circle cx="${lx + 5}" cy="${ly - 4}" r="4.5" fill="${LANG_COLOR[l] ?? C.blue}"/><text x="${lx + 15}" y="${ly}" font-size="12.5"><tspan fill="${C.text}">${esc(l)}</tspan><tspan fill="${C.dim}"> ${(p * 100).toFixed(1)}%</tspan></text>`;
-      });
-      return out + `</g>`;
-    },
-  ].filter((r) => r !== undefined);
-  let y = PADY, body = "";
-  for (const r of rows) { y += LH; if (r) body += r(y); }
-  y += 8 + 2 * 20; // leyenda de lenguajes
-
-  const topH = Math.max(y, PADY + CAT.length * LH) + 14;
-  const catY = PADY + (topH - PADY - CAT.length * LH) / 2 - 10;
-  const catLines = CAT.map((l, j) => `<tspan x="${PADX}" y="${(catY + (j + 1) * LH).toFixed(1)}" xml:space="preserve">${esc(l)}</tspan>`).join("");
-
-  // ── Mapa de actividad holográfico (último año) ──
-  const CELL = 13, GAP = 3, weeks = [];
-  for (const d of info.days) {
-    const wd = new Date(d.date + "T00:00:00Z").getUTCDay();
-    if (!weeks.length || wd === 0) weeks.push([]);
-    weeks.at(-1)[wd] = d;
-  }
-  const gridW = weeks.length * (CELL + GAP) - GAP, gx = (W - gridW) / 2;
-  const hy = topH + 34, gy = hy + 18;
-  const LVL_OP = [0.08, 0.32, 0.55, 0.78, 1];
-  let cells = "", clip = "";
-  weeks.forEach((w, c) => w.forEach((d, r) => {
-    if (!d) return;
-    const x = gx + c * (CELL + GAP), yy = gy + r * (CELL + GAP);
-    cells += `<rect x="${x}" y="${yy}" width="${CELL}" height="${CELL}" rx="3" fill="${C.cyan}" fill-opacity="${LVL_OP[d.level]}"${d.level ? "" : ` stroke="${C.cyan}" stroke-opacity="0.12"`}/>`;
-    clip += `<rect x="${x}" y="${yy}" width="${CELL}" height="${CELL}" rx="3"/>`;
-  }));
-  const gridH = 7 * (CELL + GAP) - GAP;
-  const H = gy + gridH + 34;
-  const header = `<text x="${gx}" y="${hy}" font-size="13.5"><tspan fill="${C.green}">❯</tspan><tspan fill="${C.text}"> git log --graph</tspan><tspan fill="${C.dim}"> --since="1 year ago"</tspan></text>`
-    + `<text x="${gx + gridW}" y="${hy}" font-size="12.5" text-anchor="end" fill="${C.dim}">less <tspan fill="${C.cyan}" fill-opacity="0.15">■</tspan><tspan fill="${C.cyan}" fill-opacity="0.45">■</tspan><tspan fill="${C.cyan}" fill-opacity="0.75">■</tspan><tspan fill="${C.cyan}">■</tspan> more</text>`;
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="${FONT}" font-size="${FS}">
-<defs>${commonDefs(W, H, "0%")}
-  <linearGradient id="catGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.cyan}"/><stop offset="0.6" stop-color="${C.blue}"/><stop offset="1" stop-color="${C.purple}"/></linearGradient>
-  <linearGradient id="sweep" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.cyan}" stop-opacity="0"/><stop offset="0.5" stop-color="${C.cyan}" stop-opacity="0.09"/><stop offset="1" stop-color="${C.cyan}" stop-opacity="0"/></linearGradient>
-  <linearGradient id="wave" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffffff" stop-opacity="0"/><stop offset="0.5" stop-color="#ffffff" stop-opacity="0.85"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></linearGradient>
-  <clipPath id="cells">${clip}</clipPath>
-</defs>
-<style>${commonCss}
-  .l{animation:in .35s ease-out backwards}
-  @keyframes in{from{opacity:0;transform:translateX(-6px)}}
-  .holo{animation:flicker 5s infinite}
-  @keyframes flicker{0%,47%,49%,82%,84%,100%{opacity:1}48%{opacity:.72}83%{opacity:.88}}
-  .cursor{animation:blink 1s steps(1) infinite}
-  @keyframes blink{50%{opacity:0}}
-  .sweep{animation:sweep 6s linear infinite}
-  @keyframes sweep{from{transform:translateY(-160px)}to{transform:translateY(${H + 40}px)}}
-  .wave{animation:wave 4.5s ease-in-out infinite}
-  @keyframes wave{from{transform:translateX(-160px)}to{transform:translateX(${W + 40}px)}}
-</style>
+const shell = (W, H, defs, css, body, glow = ["30%", "50%"]) => `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="${SANS}">
+<defs>${commonDefs(W, H, ...glow)}${defs}</defs>
+<style>${commonCss}${css}</style>
 <g clip-path="url(#card)">
   <rect width="${W}" height="${H}" fill="url(#bgGlow)"/>
-  <g class="holo">
-    <g filter="url(#glow)">
-      <text fill="${C.orange}" opacity="0.35" transform="translate(-1.5,0)">${catLines}</text>
-      <text fill="${C.blue}" opacity="0.35" transform="translate(1.5,0)">${catLines}</text>
-      <text fill="url(#catGrad)">${catLines}</text>
-    </g>
-    <line x1="${infoX - 26}" y1="${PADY}" x2="${infoX - 26}" y2="${topH - 10}" stroke="${C.cyan}" stroke-opacity="0.25"/>
-    <g filter="url(#glow)">${body}</g>
-    <line x1="${PADX}" y1="${topH + 6}" x2="${W - PADX}" y2="${topH + 6}" stroke="${C.cyan}" stroke-opacity="0.18" stroke-dasharray="2 4"/>
-    <g filter="url(#glow)">${header}${cells}</g>
-    <g clip-path="url(#cells)"><rect class="wave" x="0" y="${gy}" width="140" height="${gridH}" fill="url(#wave)"/></g>
-    <rect class="cursor" x="${gx + gridW + 8}" y="${gy + gridH - 13}" width="7" height="13" fill="${C.cyan}"/>
-  </g>
+  ${body}
   <rect class="scan" y="-4" width="${W}" height="${H + 8}" fill="url(#scan)"/>
-  <rect class="sweep" width="${W}" height="140" fill="url(#sweep)"/>
 </g>
-${frame(W, H)}
+<rect x="0.75" y="0.75" width="${W - 1.5}" height="${H - 1.5}" rx="18" fill="none" stroke="${C.cyan}" stroke-opacity="0.4" stroke-width="1.5" filter="url(#glow)"/>
 </svg>`;
+const label = (x, y, t, anchor = "start") =>
+  `<text x="${x}" y="${y}" font-size="11" font-weight="700" letter-spacing="3" fill="${C.purple}" text-anchor="${anchor}">${esc(t)}</text>`;
+
+// ── 1. HERO: avatar holográfico + nombre + ciclo de agente ──────────────────
+function hero(info) {
+  const W = 940, H = 300;
+  const ax = 128, ay = 150, ar = 74;
+
+  // Avatar dentro de anillos que giran en sentidos opuestos
+  const av = `
+  <circle cx="${ax}" cy="${ay}" r="${ar + 6}" fill="${C.cyan}" opacity="0.12" filter="url(#bigglow)"/>
+  <g clip-path="url(#avclip)">
+    <image href="${info.avatar}" x="${ax - ar}" y="${ay - ar}" width="${ar * 2}" height="${ar * 2}" preserveAspectRatio="xMidYMid slice"/>
+    <rect x="${ax - ar}" y="${ay - ar}" width="${ar * 2}" height="${ar * 2}" fill="${C.cyan}" opacity="0.1"/>
+    <rect class="scan" x="${ax - ar}" y="${ay - ar - 4}" width="${ar * 2}" height="${ar * 2 + 8}" fill="url(#scan)"/>
+  </g>
+  <circle cx="${ax}" cy="${ay}" r="${ar}" fill="none" stroke="${C.cyan}" stroke-width="1.5" filter="url(#glow)"/>
+  <g class="spin"><circle cx="${ax}" cy="${ay}" r="${ar + 14}" fill="none" stroke="${C.cyan}" stroke-opacity="0.7" stroke-width="1.2" stroke-dasharray="3 9"/></g>
+  <g class="spinr"><circle cx="${ax}" cy="${ay}" r="${ar + 26}" fill="none" stroke="${C.purple}" stroke-opacity="0.8" stroke-width="2" stroke-dasharray="70 40 12 40" stroke-linecap="round" filter="url(#glow)"/></g>
+  <g class="spin" style="animation-duration:7s"><circle cx="${ax}" cy="${ay - ar - 26}" r="4" fill="${C.cyan}" filter="url(#glow)"/></g>`;
+
+  // Nombre con glitch y datos
+  const tx = 262;
+  const name = `
+  <g font-size="54" font-weight="800" letter-spacing="1">
+    <text class="gl1" x="${tx}" y="122" fill="${C.orange}" opacity="0.55">HumbleG0d</text>
+    <text class="gl2" x="${tx}" y="122" fill="${C.blue}" opacity="0.55">HumbleG0d</text>
+    <text x="${tx}" y="122" fill="url(#nameGrad)" filter="url(#glow)">HumbleG0d</text>
+  </g>
+  <text x="${tx + 2}" y="154" font-size="13" font-weight="700" letter-spacing="4" fill="${C.cyan}">AI ENGINEER · AGENTS · RAG</text>
+  <text x="${tx + 2}" y="178" font-size="13" fill="${C.dim}">Computer Science Student · ${esc(info.location)}</text>`;
+  const chips = [[info.repos, "repos"], [info.stars, "stars"], [info.followers, "followers"], [info.total, "contribs"]];
+  let cx = tx, chipsSvg = "";
+  for (const [v, k] of chips) {
+    const w = 22 + String(v).length * 9 + k.length * 7;
+    chipsSvg += `<g><rect x="${cx}" y="204" width="${w}" height="30" rx="15" fill="${C.cyan}" fill-opacity="0.07" stroke="${C.cyan}" stroke-opacity="0.35"/>
+      <text x="${cx + 12}" y="224" font-size="13"><tspan fill="${C.text}" font-weight="700" font-family="${MONO}">${v}</tspan><tspan fill="${C.dim}"> ${k}</tspan></text></g>`;
+    cx += w + 10;
+  }
+
+  // Ciclo de agente: 6 nodos sobre una elipse, paquetes de datos circulando
+  const ex = 760, ey = 150, rx = 112, ry = 84;
+  const steps = ["query", "embed", "retrieve", "reason", "act", "answer"];
+  const loop = `M ${ex} ${ey - ry} A ${rx} ${ry} 0 1 1 ${ex} ${ey + ry} A ${rx} ${ry} 0 1 1 ${ex} ${ey - ry}`;
+  let graph = `
+  <path d="${loop}" fill="none" stroke="${C.cyan}" stroke-opacity="0.22" stroke-width="1.5"/>
+  <path d="${loop}" fill="none" stroke="${C.cyan}" stroke-opacity="0.6" stroke-width="1.5" stroke-dasharray="4 10" class="flow"/>
+  <circle cx="${ex}" cy="${ey}" r="30" fill="${C.purple}" opacity="0.12" class="core" filter="url(#bigglow)"/>
+  <circle cx="${ex}" cy="${ey}" r="22" fill="none" stroke="${C.purple}" stroke-opacity="0.6"/>
+  <text x="${ex}" y="${ey + 4}" text-anchor="middle" font-size="10" font-weight="700" letter-spacing="2" fill="${C.purple}">AGENT</text>`;
+  steps.forEach((s, k) => {
+    const a = (-90 + k * 60) * Math.PI / 180;
+    const nx = ex + rx * Math.cos(a), ny = ey + ry * Math.sin(a);
+    graph += `<line x1="${ex}" y1="${ey}" x2="${f1(nx)}" y2="${f1(ny)}" stroke="${C.purple}" stroke-opacity="0.12" stroke-dasharray="2 4"/>`;
+    const lx = ex + (rx + 26) * Math.cos(a), ly = ey + (ry + 22) * Math.sin(a) + 4;
+    const anchor = Math.abs(Math.cos(a)) < 0.2 ? "middle" : Math.cos(a) > 0 ? "start" : "end";
+    graph += `
+    <circle cx="${f1(nx)}" cy="${f1(ny)}" r="13" fill="${C.bg}" stroke="${C.cyan}" stroke-width="1.5" filter="url(#glow)"/>
+    <circle cx="${f1(nx)}" cy="${f1(ny)}" r="5" fill="${C.cyan}" class="pulse" style="animation-delay:${(k * 0.6).toFixed(1)}s"/>
+    <text x="${f1(lx)}" y="${f1(ly)}" text-anchor="${anchor}" font-size="11.5" font-family="${MONO}" fill="${C.text}">${s}</text>`;
+  });
+  for (let p = 0; p < 3; p++) {
+    graph += `<circle r="4" fill="#ffffff" filter="url(#glow)"><animateMotion dur="7.2s" repeatCount="indefinite" begin="-${(p * 2.4).toFixed(1)}s" path="${loop}"/></circle>`;
+  }
+
+  const defs = `
+  <linearGradient id="nameGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${C.cyan}"/><stop offset="1" stop-color="${C.purple}"/></linearGradient>
+  <clipPath id="avclip"><circle cx="${ax}" cy="${ay}" r="${ar}"/></clipPath>`;
+  const css = `
+  .spin{transform-origin:${ax}px ${ay}px;animation:spin 14s linear infinite}
+  .spinr{transform-origin:${ax}px ${ay}px;animation:spin 20s linear infinite reverse}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .gl1{animation:g1 4s steps(1) infinite}.gl2{animation:g2 4s steps(1) infinite}
+  @keyframes g1{0%,100%{transform:translate(-2px,0)}91%{transform:translate(-7px,-2px)}93%{transform:translate(3px,1px)}95%{transform:translate(-2px,0)}}
+  @keyframes g2{0%,100%{transform:translate(2px,0)}91%{transform:translate(7px,2px)}93%{transform:translate(-3px,-1px)}95%{transform:translate(2px,0)}}
+  .flow{animation:flow 1.5s linear infinite}@keyframes flow{to{stroke-dashoffset:-28}}
+  .pulse{animation:pulse 3.6s ease-in-out infinite}@keyframes pulse{0%,100%{opacity:.35}15%{opacity:1}}
+  .core{transform-origin:${ex}px ${ey}px;animation:core 3s ease-in-out infinite}@keyframes core{50%{transform:scale(1.25);opacity:.25}}`;
+  return shell(W, H, defs, css, av + name + chipsSvg + graph, ["15%", "50%"]);
 }
 
-// ── Stack holográfico ───────────────────────────────────────────────────────
+// ── 2. ACTIVIDAD: radar radial + anillos de lenguajes + rachas ──────────────
+function activity(info) {
+  const W = 940, H = 380, cx = 200, cy = 190, r0 = 62, rMax = 72;
+  const days = info.days, N = days.length || 1;
+  const max = Math.max(1, ...days.map((d) => d.count));
+  const OP = [0.2, 0.45, 0.65, 0.85, 1];
+  let rays = "", months = "";
+  days.forEach((d, i) => {
+    const a = -Math.PI / 2 + (2 * Math.PI * i) / N, cos = Math.cos(a), sin = Math.sin(a);
+    if (d.count) {
+      const len = 6 + rMax * Math.sqrt(d.count / max);
+      rays += `<line x1="${f1(cx + r0 * cos)}" y1="${f1(cy + r0 * sin)}" x2="${f1(cx + (r0 + len) * cos)}" y2="${f1(cy + (r0 + len) * sin)}" stroke="${C.cyan}" stroke-opacity="${OP[d.level]}"/>`;
+    } else {
+      rays += `<circle cx="${f1(cx + (r0 + 3) * cos)}" cy="${f1(cy + (r0 + 3) * sin)}" r="0.9" fill="${C.cyan}" opacity="0.3"/>`;
+    }
+    if (d.date.endsWith("-01")) {
+      const m = new Date(d.date + "T00:00:00Z").toLocaleDateString("en-US", { month: "short", timeZone: "UTC" }).toUpperCase();
+      months += `<text x="${f1(cx + (r0 + rMax + 20) * cos)}" y="${f1(cy + (r0 + rMax + 20) * sin + 3.5)}" text-anchor="middle" font-size="9.5" letter-spacing="1" fill="${C.dim}">${m}</text>`;
+    }
+  });
+  const R = r0 + rMax + 10;
+  const radial = `
+  <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="${C.cyan}" stroke-opacity="0.1"/>
+  <circle cx="${cx}" cy="${cy}" r="${r0 + rMax / 2}" fill="none" stroke="${C.cyan}" stroke-opacity="0.06" stroke-dasharray="2 5"/>
+  <g class="radar"><path d="M ${cx} ${cy} L ${cx} ${cy - R} A ${R} ${R} 0 0 1 ${f1(cx + R * Math.sin(0.55))} ${f1(cy - R * Math.cos(0.55))} Z" fill="url(#radarGrad)"/>
+    <line x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy - R}" stroke="${C.cyan}" stroke-opacity="0.7" filter="url(#glow)"/></g>
+  <g stroke-width="2.2" stroke-linecap="round" filter="url(#glow)">${rays}</g>
+  ${months}
+  <circle cx="${cx}" cy="${cy}" r="${r0 - 10}" fill="${C.bg}" fill-opacity="0.7" stroke="${C.cyan}" stroke-opacity="0.3"/>
+  <text x="${cx}" y="${cy + 6}" text-anchor="middle" font-size="34" font-weight="800" fill="url(#numGrad)" filter="url(#glow)">${info.total}</text>
+  <text x="${cx}" y="${cy + 26}" text-anchor="middle" font-size="9.5" letter-spacing="2" fill="${C.dim}">CONTRIBUTIONS</text>`;
+
+  // Anillos de lenguajes (se dibujan al cargar)
+  const lx = 520, ly = 190;
+  let rings = "";
+  info.langs.forEach(({ p }, k) => {
+    const r = 116 - k * 24, circ = 2 * Math.PI * r, len = Math.max(p, 0.02) * circ, col = RING_COLORS[k];
+    rings += `<circle cx="${lx}" cy="${ly}" r="${r}" fill="none" stroke="${col}" stroke-opacity="0.1" stroke-width="14"/>
+    <circle cx="${lx}" cy="${ly}" r="${r}" fill="none" stroke="${col}" stroke-width="14" stroke-linecap="round" stroke-dasharray="${f1(len)} ${f1(circ)}" transform="rotate(-90 ${lx} ${ly})" filter="url(#glow)">
+      <animate attributeName="stroke-dashoffset" from="${f1(len)}" to="0" dur="1.6s" begin="${(0.2 + k * 0.2).toFixed(1)}s" fill="freeze" calcMode="spline" keySplines="0.2 0.8 0.2 1" keyTimes="0;1"/>
+    </circle>`;
+  });
+  const top = info.langs[0];
+  rings += top ? `<text x="${lx}" y="${ly + 4}" text-anchor="middle" font-size="22" font-weight="800" fill="${C.text}">${Math.round(top.p * 100)}%</text>
+    <text x="${lx}" y="${ly + 20}" text-anchor="middle" font-size="9.5" letter-spacing="1.5" fill="${C.dim}">${esc(top.l.toUpperCase())}</text>` : "";
+
+  // Columna de datos
+  const sx = 690;
+  let side = label(sx, 62, "LANGUAGES");
+  info.langs.forEach(({ l, p }, k) => {
+    const y = 90 + k * 24;
+    side += `<circle cx="${sx + 5}" cy="${y - 4}" r="5" fill="${RING_COLORS[k]}" filter="url(#glow)"/>
+      <text x="${sx + 18}" y="${y}" font-size="13.5" fill="${C.text}">${esc(l)}</text>
+      <text x="${W - 40}" y="${y}" font-size="13" text-anchor="end" font-family="${MONO}" fill="${C.dim}">${(p * 100).toFixed(1)}%</text>`;
+  });
+  side += label(sx, 222, "RHYTHM");
+  [["Current streak", `${info.cur} days`], ["Best streak", `${info.best} days`], ["Favorite day", info.favDay], ["Record", info.peak]]
+    .forEach(([k, v], j) => {
+      const y = 250 + j * 24;
+      side += `<text x="${sx}" y="${y}" font-size="13.5" fill="${C.dim}">${k}</text>
+        <text x="${W - 40}" y="${y}" font-size="13.5" text-anchor="end" font-weight="700" fill="${C.text}">${esc(v)}</text>`;
+    });
+  side += `<line x1="${sx - 26}" y1="48" x2="${sx - 26}" y2="${H - 48}" stroke="${C.cyan}" stroke-opacity="0.15"/>`;
+
+  const defs = `
+  <radialGradient id="radarGrad" cx="${cx}" cy="${cy}" r="${R}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${C.cyan}" stop-opacity="0"/><stop offset="1" stop-color="${C.cyan}" stop-opacity="0.22"/></radialGradient>
+  <linearGradient id="numGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${C.cyan}"/><stop offset="1" stop-color="${C.purple}"/></linearGradient>`;
+  const css = `
+  .radar{transform-origin:${cx}px ${cy}px;animation:spin 6s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}`;
+  return shell(W, H, defs, css, radial + rings + side, ["20%", "50%"]);
+}
+
+// ── 3. Stack holográfico ────────────────────────────────────────────────────
 const SI = "https://cdn.jsdelivr.net/npm/simple-icons@16.37.0/icons";
 // Glifos propios (viewBox 24x24) para lo que no tiene logo en simple-icons
 const GLYPH = {
@@ -242,15 +272,15 @@ const GLYPH = {
   chroma: `<g opacity="0.92"><circle cx="8.5" cy="14.5" r="6" fill="#ffde2d" fill-opacity="0.85"/><circle cx="15.5" cy="14.5" r="6" fill="#ff6446" fill-opacity="0.8"/><circle cx="12" cy="8.5" r="6" fill="#327eff" fill-opacity="0.8"/></g>`,
 };
 const STACK = [
-  [{ title: "ai-engineer", flags: "--agents --rag", items: [
+  [{ title: "AI ENGINEERING", items: [
     ["Python", "python", "#4b8bbe"], ["LangChain", "langchain", "#7fc8ff"], ["LangGraph", "langgraph", "#7fc8ff"],
     ["RAG", { glyph: "rag" }], ["ChromaDB", { glyph: "chroma" }], ["MCP", "modelcontextprotocol"],
     ["Ollama", "ollama"], ["Hugging Face", "huggingface", "#ffd21e"],
   ]}],
-  [{ title: "backend", flags: "", items: [
+  [{ title: "BACKEND", items: [
     ["Java", "openjdk", "#e76f00"], ["Spring", "spring", "#6db33f"], ["PostgreSQL", "postgresql", "#6c9bd2"],
     ["Docker", "docker", "#2496ed"], ["React", "react", "#61dafb"],
-  ]}, { title: "devops", flags: "", items: [
+  ]}, { title: "DEVOPS", items: [
     ["Jenkins", "jenkins", "#e36a5c"], ["Actions", "githubactions", "#2088ff"], ["Postman", "postman", "#ff6c37"],
   ]}],
 ];
@@ -260,7 +290,7 @@ async function iconInner(src, color) {
   const r = await fetch(`${SI}/${src}.svg`);
   if (!r.ok) throw new Error(`icono ${src}: ${r.status}`);
   const d = (await r.text()).match(/<path d="([^"]+)"/)[1];
-  return `<path d="${d}" fill="${color ?? C.cyan}"/>`; // sin color de marca (logos negros) → cian holograma
+  return `<path d="${d}" fill="${color ?? C.cyan}"/>`; // logos negros → cian holograma
 }
 
 async function stack() {
@@ -274,7 +304,7 @@ async function stack() {
         body += `<line x1="${x + CELL * 0.3}" y1="${y + 40}" x2="${x + CELL * 0.3}" y2="${y + ROWH - 4}" stroke="${C.cyan}" stroke-opacity="0.2" stroke-dasharray="2 4"/>`;
         x += CELL * 0.6;
       }
-      body += `<text x="${Math.max(PADX, x + 8)}" y="${y + 16}" font-size="14" filter="url(#glow)"><tspan fill="${C.green}">❯</tspan><tspan fill="${C.text}"> ${sec.title}</tspan><tspan fill="${C.dim}"> ${sec.flags}</tspan></text>`;
+      body += label(Math.max(PADX, x + 10), y + 16, sec.title);
       for (const [name, src, color] of sec.items) {
         const cx = x + CELL / 2, baseY = y + 150, d = (n++ * 0.27) % 3;
         const inner = await iconInner(src, color);
@@ -288,7 +318,7 @@ async function stack() {
       <g transform="translate(${cx - 22},${baseY - 86}) scale(1.8333)">${inner}</g>
     </g>
   </g>
-  <text x="${cx}" y="${baseY + 24}" text-anchor="middle" font-size="11.5" fill="${C.cyan}" filter="url(#glow)">${esc(name)}</text>
+  <text x="${cx}" y="${baseY + 24}" text-anchor="middle" font-size="12" fill="${C.cyan}" filter="url(#glow)">${esc(name)}</text>
 </g>`;
         x += CELL;
       }
@@ -296,8 +326,7 @@ async function stack() {
     y += ROWH + 22;
   }
   const H = y - 6;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="${FONT}">
-<defs>${commonDefs(W, H, "100%")}
+  const defs = `
   <linearGradient id="beam" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="${C.cyan}" stop-opacity="0.36"/><stop offset="1" stop-color="${C.cyan}" stop-opacity="0"/></linearGradient>
   <radialGradient id="pad"><stop offset="0" stop-color="${C.cyan}" stop-opacity="0.9"/><stop offset="1" stop-color="${C.blue}" stop-opacity="0.05"/></radialGradient>
   <filter id="holo" x="-50%" y="-50%" width="200%" height="200%">
@@ -305,9 +334,8 @@ async function stack() {
     <feGaussianBlur in="c" stdDeviation="3.5" result="cb"/>
     <feComponentTransfer in="SourceGraphic" result="s"><feFuncA type="linear" slope="0.9"/></feComponentTransfer>
     <feMerge><feMergeNode in="cb"/><feMergeNode in="s"/></feMerge>
-  </filter>
-</defs>
-<style>${commonCss}
+  </filter>`;
+  const css = `
   .float{animation:float 3s ease-in-out infinite}
   @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
   .flick{animation:flick 4s infinite}
@@ -315,36 +343,29 @@ async function stack() {
   .beam{animation:beam 2.4s ease-in-out infinite}
   @keyframes beam{0%,100%{opacity:.7}50%{opacity:1}}
   .ring{animation:spin 2.5s linear infinite}
-  @keyframes spin{to{stroke-dashoffset:-28}}
-</style>
-<g clip-path="url(#card)">
-  <rect width="${W}" height="${H}" fill="url(#bgGlow)"/>
-  ${body}
-  <rect class="scan" y="-4" width="${W}" height="${H + 8}" fill="url(#scan)"/>
-</g>
-${frame(W, H)}
-</svg>`;
+  @keyframes spin{to{stroke-dashoffset:-28}}`;
+  return shell(W, H, defs, css, body, ["50%", "100%"]);
 }
 
 // ── Main ────────────────────────────────────────────────────────────────────
-const [user, repos, days, hab] = await Promise.all([
-  gh(`/users/${USER}`), gh(`/users/${USER}/repos?per_page=100&type=owner`), calendar(), habits(),
+const [user, repos, days, av] = await Promise.all([
+  gh(`/users/${USER}`), gh(`/users/${USER}/repos?per_page=100&type=owner`), calendar(), avatar(),
 ]);
 const own = repos.filter((r) => !r.fork);
 const info = {
   location: user.location?.replace(/\s+,/g, ",") || "Earth",
-  uptime: uptime(user.created_at),
   repos: user.public_repos,
   stars: own.reduce((s, r) => s + r.stargazers_count, 0),
   followers: user.followers,
+  avatar: av,
   days,
-  total: days.reduce((s, d) => s + d.count, 0),
-  streak: streaks(days),
-  habits: hab,
+  ...dayStats(days),
   langs: await languages(own),
 };
 
 mkdirSync(OUT, { recursive: true });
-writeFileSync(new URL("neofetch.svg", OUT), neofetch(info));
+writeFileSync(new URL("hero.svg", OUT), hero(info));
+writeFileSync(new URL("activity.svg", OUT), activity(info));
 writeFileSync(new URL("stack.svg", OUT), await stack());
-console.log("OK", { ...info, days: `${days.length} días` });
+rmSync(new URL("neofetch.svg", OUT), { force: true }); // diseño anterior
+console.log("OK", { ...info, avatar: "(embebido)", days: `${days.length} días` });

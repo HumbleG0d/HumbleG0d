@@ -1,11 +1,15 @@
 <!-- Las tarjetas se regeneran a diario con .github/workflows/profile.yml -->
 
 <p align="center">
-  <img src="./assets/neofetch.svg" alt="sergio@HumbleG0d — neofetch" width="100%" />
+  <img src="./assets/hero.svg" alt="HumbleG0d — AI Engineer · Agents · RAG" width="100%" />
 </p>
 
 <p align="center">
-  <img src="./assets/stack.svg" alt="Skills y herramientas" width="100%" />
+  <img src="./assets/activity.svg" alt="Actividad del último año, lenguajes y rachas" width="100%" />
+</p>
+
+<p align="center">
+  <img src="./assets/stack.svg" alt="Stack: AI engineering, backend y devops" width="100%" />
 </p>
 
 <p align="center">
